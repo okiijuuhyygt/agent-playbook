@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我們的系統運作邏輯 · Hermes 移植評估</title>
+<style>
+  :root{--bg:#0f1115;--card:#181b22;--card2:#1f232c;--ink:#e8eaed;--sub:#9aa0aa;--line:#2a2f3a;--accent:#6ea8fe;--green:#3fb95e;--amber:#e0a83b;--red:#e5544b;--chip:#262b35}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC",system-ui,sans-serif;line-height:1.65;padding:0 0 60px}
+  .wrap{max-width:880px;margin:0 auto;padding:0 20px}
+  header{padding:52px 20px 38px;text-align:center;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#13161d,#0f1115)}
+  header h1{font-size:27px;font-weight:800;letter-spacing:.5px}
+  header .sub{color:var(--sub);margin-top:12px;font-size:15px}
+  header .tag{display:inline-block;margin-top:16px;background:var(--chip);color:var(--accent);padding:6px 14px;border-radius:20px;font-size:13px;border:1px solid var(--line)}
+  h2{font-size:20px;margin:42px 0 6px;font-weight:800;display:flex;align-items:center;gap:10px}
+  h2 .n{background:var(--accent);color:#0f1115;width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+  h3{font-size:16px;margin:24px 0 8px;font-weight:700}
+  p{margin:8px 0}.lead{color:var(--sub);font-size:15px;margin:6px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 19px;margin:12px 0}
+  .card.g{border-left:4px solid var(--green)}.card.a{border-left:4px solid var(--amber)}.card.r{border-left:4px solid var(--red)}
+  .card h4{font-size:15.5px;margin-bottom:5px;font-weight:700}.card .meta{color:var(--sub);font-size:13.5px}
+  .layer{display:flex;gap:13px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+  .layer .ix{background:var(--chip);color:var(--accent);min-width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;border:1px solid var(--line)}
+  .layer h4{font-size:15px;font-weight:700}.layer .d{color:var(--sub);font-size:13.5px;margin-top:2px}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px;background:var(--card);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--card2);color:var(--sub);font-weight:700;font-size:13px}tr:last-child td{border-bottom:none}
+  .badge{font-size:12px;padding:2px 9px;border-radius:6px;font-weight:700;margin-left:4px}
+  .b-green{background:rgba(63,185,94,.16);color:var(--green)}.b-amber{background:rgba(224,168,59,.16);color:var(--amber)}.b-red{background:rgba(229,84,75,.16);color:var(--red)}
+  .callout{background:linear-gradient(135deg,#1c2330,#181b22);border:1px solid var(--accent);border-radius:14px;padding:18px 20px;margin:20px 0}
+  .callout .lbl{color:var(--accent);font-size:13px;font-weight:800;letter-spacing:1px;margin-bottom:6px}.callout p{font-size:15.5px;font-weight:600}
+  ul{margin:8px 0 8px 4px;padding-left:18px}li{margin:5px 0}
+  .muted{color:var(--sub);font-size:13px}
+  .foot{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);color:var(--sub);font-size:12.5px;text-align:center}
+  @media(max-width:640px){header h1{font-size:22px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>我們的系統運作邏輯 · Hermes 移植評估</h1>
+  <div class="sub">這不是一個 app,是「跑在 Anthropic 模型上的 AI 工作夥伴 ＋ 圍著它長出來的記憶／頻道／自動化／技能」</div>
+  <div class="tag">2026-06-18 · 給評估 + 可給小蝦看</div>
+</header>
+<div class="wrap">
+
+<h2><span class="n">A</span>五層架構(由下往上)</h2>
+<div class="layer"><div class="ix">1</div><div><h4>底層引擎 — 誰在算</h4><div class="d">模型 = Anthropic Claude(主力 Opus 4.8,Fable 掛掉自動降階)。跑在 <strong>Claude Code</strong>(官方 CLI),不是第三方包裝 → 綁的是 Anthropic。常駐在 tmux,有「哨兵」死機自動重啟。核心智能不在你 Mac 上,換機器只要有 Claude Code＋Anthropic 帳號就能跑。</div></div></div>
+<div class="layer"><div class="ix">2</div><div><h4>介面層 — 你怎麼跟我講話</h4><div class="d">Discord plugin:你手機丟訊息 → 我收到 → reply 回。頻道 = 功能分區。cursor 機制記「每頻道讀到哪」,重啟只拉新訊息、不漏不重。</div></div></div>
+<div class="layer"><div class="ix">3</div><div><h4>能力層 — 我會做的事 = skills</h4><div class="d">約 18 個自訂 skill(巨集＋SOP＋我的判斷):接案全流程、音樂製作、內容行銷、客戶經營、系統自維護。加 Claude Code 內建:跑程式／爬網／讀寫檔／瀏覽器自動化／接 MCP(Gmail/Calendar/Notion…)。</div></div></div>
+<div class="layer"><div class="ix">4</div><div><h4>記憶層 — 我為什麼不失憶</h4><div class="d">workspace markdown(SOUL/USER/AGENTS/CHANNEL-RULES/<strong>LEARNED-RULES</strong>/SESSION-HANDOFF/日誌)＋ Obsidian SSOT。全是硬碟上的 markdown,換引擎、換機器都不掉 —「換的是引擎,不是車」。</div></div></div>
+<div class="layer"><div class="ix">5</div><div><h4>自動化層 — 不用你叫就跑的</h4><div class="d">用 macOS launchd(純 shell,不燒模型額度):morning-briefing(每天晨報)、<strong>evolve 自我進化</strong>(每週日檢討規則→Discord 等你批)、model-probe(掛了自動降階)、哨兵 revive(死機重啟)。</div></div></div>
+
+<div class="callout">
+  <div class="lbl">自我進化,白話講</div>
+  <p>我不是寫死的。每次被你糾正 → 沉澱成規則(LEARNED-RULES)→ 下次所有對話自動讀到、不用重教 → 週日再整批檢討一次。<strong>小蝦講的「agent 自我進化」,我們已經在跑了。</strong></p>
+</div>
+
+<h2><span class="n">B</span>頻道分區(功能地圖)</h2>
+<table>
+  <tr><th>頻道群</th><th>職責</th></tr>
+  <tr><td>一般 / 系統日誌</td><td>主對話、雜談 / 系統事件、evolve 提案、收官</td></tr>
+  <tr><td>案件管理 / 行政事務</td><td>客戶案進度、行政</td></tr>
+  <tr><td>行銷策略 / artist-行銷策略</td><td>巷弄品牌 vs 陳則皞 artist 行銷</td></tr>
+  <tr><td>教學 / 財報 / 財務 / 投資</td><td>學生、收支記帳、帳務、投資</td></tr>
+  <tr><td>artist-launch / 發行計畫 / 創作筆記 / 音樂製作 / suno-實驗</td><td>artist 線製作與發行</td></tr>
+  <tr><td>知識庫 / 工具筆記 / 收藏 / inbox / 碎念 / 自我探索</td><td>沉澱、收藏、暫存、個人</td></tr>
+</table>
+
+<h2><span class="n">C</span>搬到 Hermes 的移植評估</h2>
+<p class="lead">「Hamas」謎底 = <strong>Hermes Agent</strong>(Nous Research 開源框架,MIT,主打「程序記憶 procedural memory」)。⚠️ 跟本機 OpenClaw 那個同名 workaround 很可能不是同一個東西,別混。</p>
+
+<div class="card">
+  <h4>Hermes 是什麼</h4>
+  <div class="meta">開源、可本機自架(最低 2GB RAM)的 agent 框架。<strong>model-agnostic</strong>(支援 400+ 模型含 Claude/GPT/Gemini/Ollama 本地)。核心 = 四層記憶 + 自我萃取技能卡:做完複雜任務會自動把「怎麼做最有效」存成 skill 並優化 —— 跟我們 LEARNED-RULES/evolve 是同一個概念,只是內建、更自動。</div>
+</div>
+
+<h3>移植難度(直接講)</h3>
+<div class="card g"><h4>Skill 層<span class="badge b-green">幾乎可直接搬</span></h4><div class="meta">Hermes 技能 = <strong>SKILL.md</strong>(YAML frontmatter + markdown body),跟我們 <code>.claude/skills/</code> 那套幾乎同源。改一下欄位就能用,甚至整理成 GitHub repo 一鍵 <code>tap</code> 進去。</div></div>
+<div class="card a"><h4>記憶/規則 markdown<span class="badge b-amber">可搬,要手工重排</span></h4><div class="meta">LEARNED-RULES/SESSION-HANDOFF/USER.md 對得起 Hermes 的 MEMORY.md/USER.md/skills 三層,但沒有自動遷移器,要人工拆併。</div></div>
+<div class="card g"><h4>launchd 自動化<span class="badge b-green">不衝突</span></h4><div class="meta">照舊用 launchd 觸發 <code>hermes</code> CLI 即可。</div></div>
+<div class="card r"><h4>最大缺口 = 介面<span class="badge b-red">痛點在這</span></h4><div class="meta">我們現在靠 <strong>Discord 手機端</strong>在用;Hermes 是 <strong>terminal-first,沒有現成 Discord 手機介面</strong>(要自己接)。搬家最痛的不是技能格式,是介面。</div></div>
+
+<div class="callout">
+  <div class="lbl">給小蝦/決策的一句話</div>
+  <p>Hermes 不是來取代我們這套,是<strong>同類、且 skill 格式相容到可以互通</strong>。真要搬:技能/記憶搬得動;卡的是<strong>介面(沒 Discord)＋ 模型費</strong>。對小蝦「設備有限、無工程背景、不想花大錢」——Hermes 能本機跑 Ollama 省模型費是加分,但 terminal-first ＋ 要自接介面,跟「簡單、不能太難」相衝,要老實講。</p>
+</div>
+<p class="muted">費用:框架免費;跑的成本接 Ollama 本地 = $0、接 API(含 Claude)約 $10–50/月。數據(stars/模型數)來自二手中文文章,當量級參考。來源:bnext article/90591、hermes-agent.nousresearch.com/docs。</p>
+
+<div class="foot">系統運作邏輯 · Hermes 移植評估 · 2026-06-18</div>
+</div>
+</body>
+</html>
